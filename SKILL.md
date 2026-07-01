@@ -38,6 +38,22 @@ Legado Web 服务绑定手机的局域网 IP（非 127.0.0.1），默认端口 `
 
 完整数据模型见 `references/legado-api.md`。
 
+### 数据结构注意事项
+
+Agent 解析 API 返回的 JSON 时需注意：
+
+- **`dur` 前缀** = 当前阅读位置（如 `durChapterIndex` = 当前章节索引，`durChapterPos` = 章节内字符偏移）
+- **`toc`** = Table of Contents（目录）
+- **时间戳**均为 Unix **毫秒**，展示时需转换
+- **`type` 是位掩码**（非枚举）：text=8, audio=32, local=256 等，一个书可同时有多个类型
+- **`origin`**：本地书为 `"loc_book"`，网络书为书源 URL
+- **`originName`** 是书源名称/本地文件名，**`name`** 才是书名
+- **`wordCount`** 是 `String`（如 "120万字"），非数字
+- **`variable` / `readConfig`** 可能是 JSON 字符串（双重编码），需要二次解析
+- **`custom*` 字段优先**：`customCoverUrl` > `coverUrl`，`customIntro` > `intro`，`customTag` > `kind`
+- **书籍关联方式不一致**：BookChapter 用 `bookUrl`，ReadRecord/BookThought 用 `bookName`+`bookAuthor`
+- **`readIteration`**：0=未读完, 1=读完一轮, 2=二刷, 3=二刷完, 依此类推
+
 ### 书架
 
 | 方法 | 端点 | 说明 |
