@@ -1,5 +1,5 @@
 ---
-name: legado-reading
+name: reading-skill
 description: Legado 阅读助手 — 通过 Legado Web API 管理用户的书架、书源、阅读记录与笔记想法。当用户询问阅读相关问题时使用。支持扩展接入其他阅读平台（如微信读书等，持续缓慢更新中）。
 version: 2.5.0
 tags: [reading, legado, reeden, books, notes, statistics]
