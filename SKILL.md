@@ -114,8 +114,60 @@ Send: {"key": "关键词"}
 | GET/POST | `/getBookSource` `/saveBookSource` `/saveBookSources` `/deleteBookSources` | 书源 CRUD |
 | GET | `/getRssSources` | 所有订阅源 |
 | GET/POST | `/getRssSource` `/saveRssSource` `/saveRssSources` `/deleteRssSources` | 订阅源 CRUD |
-| GET | `/getReplaceRules` | 所有替换规则 |
+| GET | `/getReplaceRules` | 所有替换/高亮规则 |
 | POST | `/saveReplaceRule` `/deleteReplaceRule` `/testReplaceRule` | 替换规则操作 |
+
+**ReplaceRule 字段说明（含高亮扩展）**：
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `id` | Long | 系统生成 | 唯一 ID（修改时必填，新建时留空或设为 0） |
+| `name` | String | 必填 | 规则名称 |
+| `group` | String? | null | 分组名 |
+| `pattern` | String | 必填 | 匹配模式（普通字符串或正则） |
+| `replacement` | String | 必填 | 替换内容（净化规则留空=""表示删除；高亮规则填 HTML 格式） |
+| `isRegex` | Boolean | false | 是否使用正则表达式 |
+| `isHighlight` | Boolean | false | 是否为高亮规则（用 HTML 渲染替换内容，需 `isRegex=true`） |
+| `scope` | String? | "" | 作用书源 URL，空=全部书籍 |
+| `scopeTitle` | Boolean | false | 是否作用于章节标题 |
+| `scopeContent` | Boolean | true | 是否作用于正文 |
+| `excludeScope` | String? | null | 排除范围（书源 URL，逗号分隔） |
+| `isEnabled` | Boolean | true | 是否启用 |
+| `order` | Int | 0 | 执行顺序，数字越小越先执行 |
+
+**高亮规则 replacement 格式（`isHighlight=true` 时）**：
+
+- 捕获组引用：`$0`（整个匹配）、`$1`（第1个括号）、`$N`（第N个括号）
+- 支持 HTML 标签：`<b>`加粗、`<i>`斜体、`<u>`下划线、`<font color="#D32F2F">`颜色、`<big>`/`<small>`字号
+- 示例：`pattern="\"([^\"]+)\""` + `replacement="<b><font color=\"#D32F2F\">$1</font></b>"` + `isRegex=true` + `isHighlight=true`
+  → 将书中所有双引号内文字加粗并染红，引号本身被丢弃
+
+### 主题配色管理
+
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| GET | `/getThemeConfigs` | 获取所有已保存的主题配色列表 |
+| POST | `/saveThemeConfig` | 新建或覆盖主题（同名则覆盖）。Body: `ThemeConfig.Config` JSON |
+| POST | `/deleteThemeConfig` | 删除指定主题。Body: `{"themeName":"主题名"}` |
+| POST | `/applyThemeConfig` | 应用指定主题，触发 App UI 刷新。Body: `{"themeName":"主题名"}` |
+
+**ThemeConfig.Config 字段**：
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `themeName` | String | 必填 | 主题名称（同名则覆盖） |
+| `isNightTheme` | Boolean | false | `true`=夜间，`false`=日间 |
+| `primaryColor` | String | 必填 | 主色，16进制如 `"#607D8B"` |
+| `accentColor` | String | 必填 | 强调色，16进制如 `"#BF360C"` |
+| `backgroundColor` | String | 必填 | 背景色（夜间模式必须为深色） |
+| `bottomBackground` | String | 必填 | 底部栏背景色 |
+| `cardBackground` | String? | `"#F3EDF7"` | 卡片背景色 |
+| `cardBackgroundAlpha` | Int | 100 | 卡片透明度 0-100 |
+| `transparentNavBar` | Boolean | 必填 | 是否透明导航栏 |
+| `backgroundImgPath` | String? | null | 背景图路径（null=纯色；http=网络图；本地路径） |
+| `backgroundImgBlur` | Int | 必填 | 背景图模糊强度 0-25（0=不模糊） |
+
+> ⚠️ 修改主题后需调用 `/applyThemeConfig` 才会生效；`/applyThemeConfig` 会触发 App 内所有界面刷新。
 
 ### 其他
 

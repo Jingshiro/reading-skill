@@ -67,8 +67,37 @@
 - `ruleArticles`, `ruleNextPage`, `ruleTitle`, `ruleContent`
 
 ### ReplaceRule
-- `id`, `name`, `group`, `pattern`, `replacement`
-- `scope`, `scopeTitle`, `scopeContent`, `excludeScope`, `isEnabled`
+- `id`: Long（修改时必填，新建时留空或设为 0）
+- `name`: String（规则名称）
+- `group`: String?（分组名）
+- `pattern`: String（匹配模式）
+- `replacement`: String（替换内容；高亮规则用 HTML 格式）
+- `isRegex`: Boolean（是否正则，默认 false）
+- `isHighlight`: Boolean（是否高亮规则，默认 false；需配合 `isRegex=true`）
+- `scope`: String?（作用书源 URL，空=全部）
+- `scopeTitle`: Boolean（是否作用于标题，默认 false）
+- `scopeContent`: Boolean（是否作用于正文，默认 true）
+- `excludeScope`: String?（排除范围，逗号分隔书源 URL）
+- `isEnabled`: Boolean（是否启用）
+- `order`: Int（执行顺序，越小越先）
+
+**高亮规则 replacement 格式**（`isHighlight=true` 时）：
+- 捕获组：`$0`整个匹配、`$1`第1括号、`$N`第N括号
+- HTML 标签：`<b>`加粗、`<i>`斜体、`<u>`下划线、`<font color="#颜色">`颜色、`<big>`/`<small>`字号
+- 示例：`<b><font color="#D32F2F">$1</font></b>`
+
+### ThemeConfig.Config
+- `themeName`: String（必填，同名则覆盖）
+- `isNightTheme`: Boolean（true=夜间，false=日间）
+- `primaryColor`: String（主色，16进制如 `"#607D8B"`）
+- `accentColor`: String（强调色）
+- `backgroundColor`: String（背景色，夜间模式必须为深色）
+- `bottomBackground`: String（底部栏背景色）
+- `cardBackground`: String?（卡片背景色，默认 `"#F3EDF7"`）
+- `cardBackgroundAlpha`: Int（卡片透明度 0-100，默认 100）
+- `transparentNavBar`: Boolean（透明导航栏）
+- `backgroundImgPath`: String?（背景图路径；null=纯色；http=网络图；本地路径）
+- `backgroundImgBlur`: Int（模糊强度 0-25）
 
 ## HTTP API
 
@@ -107,13 +136,21 @@
 | POST | `/saveRssSources` | 批量保存 |
 | POST | `/deleteRssSources` | 批量删除 |
 
-### Replace Rules
+### Replace Rules & Highlight Rules
 | 方法 | 端点 | 说明 |
 |------|------|------|
-| GET | `/getReplaceRules` | 所有替换规则 |
-| POST | `/saveReplaceRule` | 保存规则 |
+| GET | `/getReplaceRules` | 所有替换/高亮规则 |
+| POST | `/saveReplaceRule` | 保存规则（完整 ReplaceRule JSON） |
 | POST | `/deleteReplaceRule` | 删除规则（需 `id`） |
-| POST | `/testReplaceRule` | 测试规则 |
+| POST | `/testReplaceRule` | 测试规则（Body: `{rule, text}`） |
+
+### Theme Config（主题配色）
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| GET | `/getThemeConfigs` | 所有已保存的主题配色列表 |
+| POST | `/saveThemeConfig` | 新建或覆盖主题（Body: ThemeConfig.Config JSON） |
+| POST | `/deleteThemeConfig` | 删除主题（Body: `{"themeName":"..."}`） |
+| POST | `/applyThemeConfig` | 应用主题并触发 UI 刷新（Body: `{"themeName":"..."}`） |
 
 ### Book Thoughts（读书想法）
 | 方法 | 端点 | 参数 |
